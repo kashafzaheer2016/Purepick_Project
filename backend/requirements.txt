@@ -1,0 +1,73 @@
+# ── Core Framework ─────────────────────────────────────────────────────────────
+django==4.2.16
+djangorestframework==3.15.2
+django-cors-headers==4.3.1
+
+# ── Auth & Security ────────────────────────────────────────────────────────────
+djangorestframework-simplejwt==5.3.1
+django[argon2]
+argon2-cffi==23.1.0
+google-auth==2.29.0
+google-auth-oauthlib==1.2.0
+python-dotenv==1.0.1
+
+# ── Async Task Queue ───────────────────────────────────────────────────────────
+celery==5.4.0
+redis==5.0.4                    # Redis client (broker + result backend)
+django-celery-results==2.5.1    # Optional: store results in DB as fallback
+
+# ── Image Processing & OCR ─────────────────────────────────────────────────────
+Pillow==10.3.0
+easyocr==1.7.1
+
+# ── AI ─────────────────────────────────────────────────────────────────────────
+google-genai>=0.5.0             # new SDK — uses v1 endpoint, supports AQ. key format
+
+# ── ML ─────────────────────────────────────────────────────────────────────────
+scikit-learn==1.4.2
+pandas==2.2.2
+numpy==2.0.2                # 2.x required: cv2/albumentations on Railway use numpy._core (2.x path)
+rapidfuzz==3.9.3
+
+# ── HTTP ───────────────────────────────────────────────────────────────────────
+requests==2.32.3
+
+# ── Database ───────────────────────────────────────────────────────────────────
+psycopg2-binary==2.9.9
+
+# ── Skin Facial Analysis ───────────────────────────────────────────────────────
+# Install torch FIRST (CPU-only in Docker; GPU handled by Colab during training):
+#   pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cpu
+opencv-python-headless==4.10.0.84  # 4.10+ compiled for numpy 2.x
+torch>=2.0.0
+torchvision>=0.15.0
+timm==0.9.16                       # EfficientNet-B4 backbone (skin_classifier.py)
+albumentations==1.4.18             # 1.4.18+ compatible with numpy 2.x
+mediapipe==0.10.14                 # BlazeFace detector — best-effort face confirmation for mobile selfies
+
+# ── Production Logging ─────────────────────────────────────────────────────────
+python-json-logger==2.0.7
+
+# ── Batch 3 additions ──────────────────────────────────────────────────────────
+joblib==1.4.2          # model serialization (already in sklearn, pinned explicitly)
+
+# ── Batch 4 additions ──────────────────────────────────────────────────────────
+# requests already listed above — used by barcode_service.py
+# No new pip packages needed for barcode (calls Open Beauty Facts HTTP API)
+# Email: Django's built-in email framework (no extra package)
+
+# ── Testing (Batch 5) ──────────────────────────────────────────────────────────
+pytest==8.3.2
+pytest-django==4.9.0      # Django integration for pytest
+pytest-cov==5.0.0         # Coverage reporting
+pytest-mock==3.14.0       # pytest.mock integration
+factory-boy==3.3.1        # test fixture factories (for future use)
+
+# ── Batch 6 additions ──────────────────────────────────────────────────────────
+reportlab==4.2.2         # PDF generation for scan export
+firebase-admin==6.5.0    # FCM push notifications (optional — graceful fallback if missing)
+
+# ── Production serving ────────────────────────────────────────────────────────
+gunicorn==22.0.0         # WSGI server (used by Dockerfile CMD; replaces runserver in containers)
+whitenoise==6.7.0        # Serve static files in production
+dj-database-url==2.2.0   # Parse DATABASE_URL for Railway/Heroku

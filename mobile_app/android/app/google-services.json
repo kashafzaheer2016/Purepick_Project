@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "475901765248",
+    "project_id": "purepick-20c82",
+    "storage_bucket": "purepick-20c82.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:475901765248:android:f34d0a998d7d8f558e6865",
+        "android_client_info": {
+          "package_name": "com.example.purepick"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "475901765248-8ab3mv23ke96kv4r7pq7uglu2c6u7vsb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.purepick",
+            "certificate_hash": "6167a6e8181f71698a8687cece5a0007ad8d01c5"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXN33wk9XUk11mL_-wQSbnqEHv6_ik2qY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,44 @@
+name: purepick
+description: PurePick – Luxury Beauty Intelligence
+
+publish_to: 'none'
+version: 1.1.0+7
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP & Storage
+  http: ^1.2.1
+  shared_preferences: ^2.3.2
+
+  # Camera
+  camera: ^0.11.0+2
+
+  # Barcode
+  mobile_scanner: ^5.2.3
+
+  # Firebase & Auth
+  firebase_core: ^3.6.0
+  google_sign_in: ^6.2.1
+
+  # UI / Fonts
+  google_fonts: ^6.2.1
+
+  # Image
+  image_picker: ^1.1.2
+  flutter_markdown: ^0.7.7+1
+  geolocator: ^14.0.2
+  share_plus: ^12.0.2
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

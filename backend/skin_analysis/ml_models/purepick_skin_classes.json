@@ -1,0 +1,24 @@
+{
+  "conditions": [
+    "Acne",
+    "Dark_Circles",
+    "Hyperpigmentation",
+    "Rosacea_Redness",
+    "Eczema_Dermatitis",
+    "Dry_Skin",
+    "Oily_Skin",
+    "Fine_Lines_Wrinkles",
+    "Enlarged_Pores",
+    "Acne_Scars",
+    "Melasma_Dark_Spots",
+    "Psoriasis",
+    "Normal_Skin",
+    "Photodamage"
+  ],
+  "num_classes": 14,
+  "image_size": 380,
+  "threshold": 0.4,
+  "backbone": "efficientnet_b4",
+  "best_val_f1": 0.4093,
+  "version": "2.0"
+}
