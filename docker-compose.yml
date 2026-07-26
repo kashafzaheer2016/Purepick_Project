@@ -1,0 +1,156 @@
+# ── PurePick Docker Compose Stack ────────────────────────────────────────────
+# Usage:
+#   docker-compose up -d redis db          # just infrastructure
+#   docker-compose up --build              # full stack (first run)
+#   docker-compose up -d                   # full stack (background)
+#
+# Workers:
+#   ml queue      (concurrency=2) — OCR + ResNet-50 inference
+#   default queue (concurrency=4) — Gemini, barcode lookup (Tier-3 AI fallback),
+#                                    ingredient analysis, light tasks
+#
+# Requires a .env file in this directory — see .env.example for required keys.
+# Critical: GEMINI_API_KEY must be set for the Tier-3 barcode AI fallback.
+
+services:
+
+  # ── Redis (Celery broker + result backend) ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - purepick_net
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       purepick_db
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: purepick_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - purepick_net
+
+  # ── Django API (Gunicorn) ──────────────────────────────────────────────────
+  api:
+    build: ./backend
+    restart: unless-stopped
+    # No 'command' override — uses Dockerfile CMD:
+    #   python manage.py migrate && collectstatic && gunicorn (2 workers, 4 threads, 120s timeout)
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: purepick_core.settings.dev
+      DB_HOST:    db
+      REDIS_URL:  redis://redis:6379/0
+      GOOGLE_CLIENT_ID: 475901765248-ceko722evo5ar2ug44rdup7m3n8or8ko.apps.googleusercontent.com
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - scan_data:/app/scans
+      - media_data:/app/media
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    networks:
+      - purepick_net
+
+  # ── Celery ML Worker (OCR + ResNet-50 skin analysis) ──────────────────────
+  celery_ml:
+    build: ./backend
+    restart: unless-stopped
+    command: >
+      celery -A purepick_core worker
+        --queues ml
+        --concurrency 2
+        --loglevel info
+        --hostname ml@%h
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: purepick_core.settings.dev
+      DB_HOST:   db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - scan_data:/app/scans
+      - media_data:/app/media
+    networks:
+      - purepick_net
+
+  # ── Celery Default Worker (Gemini AI, barcode Tier-3, light tasks) ─────────
+  celery_default:
+    build: ./backend
+    restart: unless-stopped
+    command: >
+      celery -A purepick_core worker
+        --queues default
+        --concurrency 4
+        --loglevel info
+        --hostname default@%h
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: purepick_core.settings.dev
+      DB_HOST:         db
+      REDIS_URL:       redis://redis:6379/0
+      # Explicit passthrough — required for Tier-3 barcode AI fallback
+      # (barcode_service._lookup_via_gemini reads this from Django settings)
+      GEMINI_API_KEY:  ${GEMINI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - scan_data:/app/scans
+      - media_data:/app/media
+    networks:
+      - purepick_net
+
+# ── Named volumes ──────────────────────────────────────────────────────────────
+volumes:
+  redis_data:
+  postgres_data:
+  scan_data:     # shared between api + celery_ml + celery_default (uploaded scans)
+  media_data:    # shared between api + celery_ml (product images, skin photos)
+
+# ── Internal network (services isolated from host by default) ─────────────────
+networks:
+  purepick_net:
+    driver: bridge

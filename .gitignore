@@ -1,0 +1,61 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Django
+*.log
+db.sqlite3
+staticfiles/
+media/
+scans/
+
+# Environment variables — NEVER commit
+.env
+.env.local
+backend/.env
+
+# ML model files (Keep small ones, ignore generic big ones)
+*.pth
+*.onnx
+# ALLOW skin analysis models (74MB fits GitHub 100MB limit)
+!backend/skin_analysis/ml_models/*.pt
+!backend/skin_analysis/ml_models/*.json
+!backend/skin_analysis/ml_models/*.xml
+!backend/skin_analysis/ml_models/*.prototxt
+!backend/skin_analysis/ml_models/*.caffemodel
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+mobile_app/.dart_tool/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
+mobile_app/build/
+mobile_app/android/.gradle/
+mobile_app/android/local.properties
+mobile_app/ios/Pods/
+
+# Node
+node_modules/
+.next/
+out/
+
+# Temp
+*.tmp
+tmp/
